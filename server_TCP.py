@@ -6,7 +6,8 @@ ADDRESS = ('0.0.0.0', 6969) #0.0.0.0 indirizzo ip speciale = this host(questo ho
 MAX_CONNECTIONS = 3
 BUFFER = 4096
 
-alphabot = AlphaBot()
+ab = AlphaBot()
+ab.stop() #OBBLIGATORIO
 
 #creo un socket ipv4 udp
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -20,10 +21,23 @@ connection, sender_address = s.accept()
 message_bin = connection.recv(BUFFER)
 #print(f"ho ricevuto {message_bin.decode()}")
 
-if(message_bin.decode()=="avanti"):
-    print("Vado avanti")
-    # alphabot.forward()
-    # time.sleep(5)
-    # alphabot.stop()
+# if(message_bin.decode()=="avanti"):
+#     #print("Vado avanti")
+#     alphabot.forward()
+#     time.sleep(5)
+#     alphabot.stop()
+
+match message_bin.decode():
+    case "avanti":
+        ab.forward()
+    case "indietro":
+        ab.backward()
+    case "sinistra":
+        ab.left()
+    case "destra": 
+        ab.right()
+    case "stop":
+        ab.stop()
+
 
 s.close()
