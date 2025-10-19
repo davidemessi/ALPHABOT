@@ -27,17 +27,24 @@ message_bin = connection.recv(BUFFER)
 #     time.sleep(5)
 #     alphabot.stop()
 
-match message_bin.decode():
-    case "avanti":
+#USARE UNA VARIABILE AUSIILARIA PER TENER CONTO DELL'ULTIMO COMANDO PREMUTO E SE È UGUALE A
+#QUELLO PREMUTO ORA LO IGNORO IN MODO TALE DA NON MANDARE TROPPI MESSAGGI UGUALI
+while True:
+    print(message_bin.decode())
+    if(message_bin.decode()=="avanti"):
         ab.forward()
-    case "indietro":
+        message_bin = connection.recv(BUFFER)
+    elif(message_bin.decode()=="indietro"):
         ab.backward()
-    case "sinistra":
-        ab.left()
-    case "destra": 
+        message_bin = connection.recv(BUFFER)
+    elif(message_bin.decode()=="destra"):
         ab.right()
-    case "stop":
+        message_bin = connection.recv(BUFFER)
+    elif(message_bin.decode()=="sinistra"):
+        ab.left()
+        message_bin = connection.recv(BUFFER)
+    elif(message_bin.decode()=="stop"):
         ab.stop()
-
+        message_bin = connection.recv(BUFFER)
 
 s.close()
