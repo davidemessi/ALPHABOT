@@ -3,38 +3,33 @@ from AlphaBot import AlphaBot
 import time
 import sqlite3
 
-ADDRESS = ('0.0.0.0', 8080) #0.0.0.0 indirizzo ip speciale = this host(questo host)
+ADDRESS = ('0.0.0.0', 8080)
 MAX_CONNECTIONS = 3
 BUFFER = 4096
 
 comandoPrecedente = 'stop'
 
 ab = AlphaBot()
-ab.stop() #OBBLIGATORIO
+ab.stop()  # OBBLIGATORIO
 
-#creo un socket ipv4 udp
+# creo un socket TCP
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-#server quindi .bind
 s.bind(ADDRESS)
 s.listen(MAX_CONNECTIONS)
 connection, sender_address = s.accept()
 
-#metto in ascolto il server
-message_bin = connection.recv(BUFFER)
-
-
 while True:
     message_bin = connection.recv(BUFFER)
+    if not message_bin:
+        break
+
     comando = message_bin.decode().strip()
     print(f"comandoPrecedente = {comandoPrecedente}")
     print(f"messaggio ricevuto da client = {comando}")
 
-    # se il comando è uguale al precedente, lo ignoro
     if comando == comandoPrecedente:
         continue
 
-    # aggiorno comando precedente
     comandoPrecedente = comando
 
     if comando == "avanti":
@@ -50,32 +45,37 @@ while True:
     elif comando == "quadrato":
         con = sqlite3.connect("./alphaBot_DB.db")
         cur = con.cursor()
-        res = cur.execute(f"SELECT movimento FROM Comandi")
-        movimenti = res.fetchall()
-        #print(f"movimenti: {movimenti}")
 
-        for riga in movimenti:
-            movimento = riga[0]
-            print(f"Eseguo: {movimento}")
+        cur.execute(f"SELECT movimento, tempi FROM Comandi WHERE nome_comando LIKE '{comando}'")
+        righe = cur.fetchall()
 
-            if movimento == "avanti":
+        print(f"righe: {righe}")
+
+        movimenti_str, tempi_str = righe[0]
+        lista_mov = [m.strip() for m in movimenti_str.split(',')]
+        lista_tempi = [t.strip() for t in tempi_str.split(',')]
+
+        for mov, temp in zip(lista_mov, lista_tempi):
+            print(f"Eseguo: {mov} per {temp} secondi")
+
+            if mov == "avanti":
                 ab.forward()
-            elif movimento == "indietro":
+                time.sleep(float(temp))
+            elif mov == "indietro":
                 ab.backward()
-            elif movimento == "sinistra":
+                time.sleep(float(temp))
+            elif mov == "sinistra":
                 ab.left()
-            elif movimento == "destra":
+                time.sleep(float(temp))
+            elif mov == "destra":
                 ab.right()
-            elif movimento == "aspetta":
-                time.sleep(1)
+                time.sleep(float(temp))
+            elif mov == "aspetta":
+                ab.stop()
+                time.sleep(float(temp))
+
 
         ab.stop()
         con.close()
-
-        #DA PROVARE SE FUNZIONA QUESTO CODICE CON IL DB
-
-        
-
-        
 
 s.close()
