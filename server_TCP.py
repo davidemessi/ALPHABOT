@@ -42,7 +42,7 @@ while True:
         ab.left()
     elif comando == "stop":
         ab.stop()
-    elif comando == "quadrato":
+    elif comando == "quadrato" or comando == "avanti_indietro":
         con = sqlite3.connect("./alphaBot_DB.db")
         cur = con.cursor()
 
